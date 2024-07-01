@@ -1,0 +1,170 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono&display=swap');
+
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: 'Space Mono', monospace; /* Fallback for Apercu Mono Pro */
+    background-color: #f0f4f8;
+    color: #2d3748;
+}
+
+.container {
+    display: flex;
+    height: 100vh; /* Full viewport height */
+    width: 100vw; /* Full viewport width */
+}
+
+.pdf-section, .chat-section {
+    flex: 1; /* This makes both sections take up equal space */
+    width: 50%; /* Explicitly set width to 50% */
+    height: 100%; /* Full height of the container */
+    overflow-y: auto; /* Allow scrolling if content overflows */
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.pdf-section {
+    background-color: #e2e8f0;
+}
+
+.chat-section {
+    background-color: #edf2f7;
+    display: flex;
+    flex-direction: column;
+}
+
+#pdf-viewer {
+    width: 100%;
+    height: calc(100% - 100px); /* Adjust based on the height of other elements */
+    border: none;
+    background-color: #e2e8f0;
+}
+
+.pdf-controls {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.custom-file-upload {
+    border: 1px solid #4a5568;
+    display: inline-block;
+    padding: 6px 12px;
+    cursor: pointer;
+    background-color: #4a5568;
+    color: white;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.custom-file-upload:hover {
+    background-color: #2d3748;
+}
+
+#pdf-upload {
+    display: none;
+}
+
+#file-name {
+    margin-left: 10px;
+    font-size: 14px;
+    color: #4a5568;
+}
+
+.remove-btn {
+    background-color: #e53e3e;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease;
+}
+
+.remove-btn:hover {
+    background-color: #c53030;
+}
+
+.remove-btn:disabled {
+    background-color: #718096;
+    cursor: not-allowed;
+}
+#chat-messages {
+    flex-grow: 1;
+    overflow-y: auto;
+    margin-bottom: 20px;
+    border: 1px solid #cbd5e0;
+    padding: 20px;
+    background-color: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    font-family: 'Space Mono', monospace;
+}
+
+.chat-input-container {
+    display: flex;
+    align-items: center;
+    background-color: #aeb3d5;
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin-top: auto;
+}
+
+.chat-input-container {
+    display: flex;
+    align-items: flex-end; /* Changed from center to flex-end */
+    background-color: rgb(227, 232, 239);
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin-top: 20px;
+}
+
+#chat-input {
+    flex-grow: 1;
+    background-color: transparent;
+    border: none;
+    color: #4c4c54;
+    font-family: 'Space Mono', monospace;
+    font-size: 14px;
+    padding: 8px 0;
+    outline: none;
+    resize: none; /* Prevents manual resizing */
+    overflow-y: auto; /* Adds a scrollbar when needed */
+    max-height: 150px; /* Adjust this value as needed */
+    line-height: 1.5; /* Improves readability for multi-line text */
+}
+
+#chat-input::placeholder {
+    color: #8E8EA0;
+}
+
+#send-button {
+    background-color: transparent;
+    border: none;
+    color: #8E8EA0;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 0 8px;
+    transition: color 0.3s ease;
+    align-self: flex-end; /* Aligns the button to the bottom */
+}
+
+#send-button:hover {
+    color: #ffffff;
+}
+
+h2 {
+    margin-bottom: 20px;
+    color: #2d3748;
+}
+#pdf-upload {
+    margin-bottom: 20px;
+}
