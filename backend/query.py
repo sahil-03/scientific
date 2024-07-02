@@ -1,13 +1,13 @@
 import pickle
 import numpy as np
 from sentence_transformers import SentenceTransformer, util
-from openai import OpenAI 
+import openai
 from flask import Flask, request, jsonify
 
-app = Flask("parser")
+app = Flask(__name__)
 
 # Unpickle the file
-with open('chunks_store.pkl', 'rb') as file:
+with open('chunk_store.pkl', 'rb') as file:
     chunks = pickle.load(file)
 
 # Load pre-trained model
@@ -15,7 +15,7 @@ model = SentenceTransformer('all-MiniLM-L6-v2')
 chunk_embeddings = model.encode(chunks, convert_to_tensor=True)
 
 # Create OpenAI client 
-client = OpenAI()
+openai.api_key = "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"
 
 SYS_PROMPT = "You are an intelligent chat bot that, given context from some research paper and a question, "\
              "can provide an accurate and insightful answer to help clarify whatever the user asked."
@@ -44,7 +44,7 @@ def ask():
     prompt += "\n".join(get_top_k_chunks(data['question']))
     prompt += "\n\nAnswer:"
 
-    response = client.chat.completions.create(
+    response = openai.ChatCompletion.create(
         model="gpt-4o", 
         messages=[
             {"role": "system", "content": SYS_PROMPT}, 

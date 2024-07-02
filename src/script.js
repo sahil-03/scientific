@@ -47,6 +47,7 @@ function sendMessage() {
     }
 }
 
+
 sendButton.addEventListener('click', sendMessage);
 
 chatInput.addEventListener('input', function() {
@@ -54,7 +55,6 @@ chatInput.addEventListener('input', function() {
     this.style.height = (this.scrollHeight) + 'px';
 });
 
-// Reset height when cleared
 chatInput.addEventListener('keydown', function(e) {
     if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault(); 
@@ -63,14 +63,6 @@ chatInput.addEventListener('keydown', function(e) {
     }
 });
 
-function sendMessage() {
-    const message = chatInput.value.trim();
-    if (message) {
-        addMessage(message);
-        chatInput.value = '';
-        chatInput.style.height = 'auto';
-    }
-}
 
 
 pdfUpload.addEventListener('change', function(e) {
