@@ -26,13 +26,28 @@ function sendMessage() {
     if (message) {
         addMessage(message);
         chatInput.value = '';
-        // Here you would typically send the message to your AI backend
-        // and then add the AI's response using addMessage(aiResponse, false);
+        
+        try {
+            const response = fetch('http://127.0.0.1:5000/ask', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    question: message
+                })
+            });
+            const data = response.json();
+            addMessage(data.answer, false);
+            console.log(data.answer)
+        } catch (error) {
+            console.error('Error asking question:', error);
+            addMessage("Sorry, there was an error processing your question.", false);
+        }
     }
 }
 
 sendButton.addEventListener('click', sendMessage);
-
 
 chatInput.addEventListener('input', function() {
     this.style.height = 'auto';
@@ -42,9 +57,9 @@ chatInput.addEventListener('input', function() {
 // Reset height when cleared
 chatInput.addEventListener('keydown', function(e) {
     if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault(); // Prevent default to avoid newline
+        e.preventDefault(); 
         sendMessage();
-        this.style.height = 'auto'; // Reset height after sending
+        this.style.height = 'auto';
     }
 });
 
@@ -53,7 +68,7 @@ function sendMessage() {
     if (message) {
         addMessage(message);
         chatInput.value = '';
-        chatInput.style.height = 'auto'; // Reset height after sending
+        chatInput.style.height = 'auto';
     }
 }
 
@@ -61,6 +76,28 @@ function sendMessage() {
 pdfUpload.addEventListener('change', function(e) {
     const file = e.target.files[0];
     if (file) {
+        const reader = new FileReader();
+        reader.onload = async function(event) {
+            const pdfData = event.target.result;
+            try {
+                const response = await fetch('http://127.0.0.1:5000/process_pdf', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/pdf'
+                    },
+                    body: pdfData
+                });
+                const data = await response.json();
+                if (data.chunks) {
+                    window.pdfChunks = data.chunks;
+                    console.log('PDF processed successfully');
+                }
+            } catch (error) {
+                console.error('Error processing PDF:', error);
+            }
+        };
+        reader.readAsArrayBuffer(file);
+
         const fileURL = URL.createObjectURL(file);
         pdfViewer.src = fileURL;
         removePdfBtn.disabled = false;
