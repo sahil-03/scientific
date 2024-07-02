@@ -17,7 +17,6 @@ tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
 MAX_TOKENS = 512  # Maximum tokens per chunk
 OVERLAP = 50  # Number of overlapping tokens between chunks
 
-openai.api_key = 'xyz'
 SYS_PROMPT = "You are an intelligent chat bot that, given context from some research paper and a question, "\
              "can provide an accurate and insightful answer to help clarify whatever the user asked."
 
