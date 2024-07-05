@@ -7,18 +7,21 @@ import pickle
 from nltk.tokenize import sent_tokenize
 import numpy as np
 from sentence_transformers import SentenceTransformer, util
-import openai
+from openai import OpenAI 
+import os 
+
+
+MAX_TOKENS = 512  
+OVERLAP = 50
+SYS_PROMPT = "You are an intelligent chat bot that, given context from some research paper and a question, "\
+             "can provide an accurate and insightful answer to help clarify whatever the user asked."
+
 
 app = Flask("__name__")
-
+client = OpenAI()
 nltk.download('punkt')
 tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
 
-MAX_TOKENS = 512  # Maximum tokens per chunk
-OVERLAP = 50  # Number of overlapping tokens between chunks
-
-SYS_PROMPT = "You are an intelligent chat bot that, given context from some research paper and a question, "\
-             "can provide an accurate and insightful answer to help clarify whatever the user asked."
 
 @app.route('/process_pdf', methods=['POST'])
 def process_pdf():
@@ -49,7 +52,7 @@ def process_pdf():
         if current_length + sentence_length > MAX_TOKENS:
             if current_chunk:
                 chunks.append(tokenizer.decode(current_chunk))
-            current_chunk = sentence_tokens[-OVERLAP:]  # Start with overlap from previous chunk
+            current_chunk = sentence_tokens[-OVERLAP:] 
             current_length = len(current_chunk)
         
         current_chunk.extend(sentence_tokens)
@@ -76,41 +79,39 @@ def get_top_k_chunks(query, k=5):
 
     # Load pre-trained model
     model = SentenceTransformer('all-MiniLM-L6-v2')
-    chunk_embeddings = model.encode(chunks, convert_to_tensor=True)
+    chunk_embeddings = model.encode(chunks, convert_to_tensor=True).cpu()
 
-    # Encode query
-    query_embedding = model.encode(query, convert_to_tensor=True)
-
-    # Compute cosine similarities
+    query_embedding = model.encode(query, convert_to_tensor=True).cpu()
     cosine_scores = util.pytorch_cos_sim(query_embedding, chunk_embeddings)[0]
-
-    # Get top-k chunks
-    top_k_indices = np.argsort(cosine_scores)[-k:]
+    top_k_indices = np.argsort(cosine_scores)[-k:].cpu().numpy()
     top_k_chunks = [chunks[i] for i in top_k_indices]
-
     return top_k_chunks
 
 
 @app.route('/ask', methods=['POST'])
 def ask():
-    data = request.json
-    if 'question' not in data:
-        return jsonify({"error": "No question provided"}), 400
+    try:
+        data = request.json
+        if 'question' not in data:
+            return jsonify({"error": "No question provided"}), 400
 
-    prompt = f"Question: {data['question']}\n\nContext:\n"
-    prompt += "\n".join(get_top_k_chunks(data['question']))
-    prompt += "\n\nAnswer:"
+        prompt = f"Question: {data['question']}\n\nContext:\n"
+        prompt += "\n".join(get_top_k_chunks(data['question']))
+        prompt += "\n\nAnswer:"
 
-    response = openai.ChatCompletion.create(
-        model="gpt-4o", 
-        messages=[
-            {"role": "system", "content": SYS_PROMPT}, 
-            {"role": "user", "content": prompt}
-        ]
-    )
-    x = response.choices[0].text.strip()
-    print(x)
-    return x
+        response = client.chat.completions.create(
+            model="gpt-4", 
+            messages=[
+                {"role": "system", "content": SYS_PROMPT}, 
+                {"role": "user", "content": prompt}
+            ]
+        )
+        ans = response.choices[0].message.content
+        return jsonify({"answer": ans}), 200
+    except Exception as e:
+        print(f"Error in /ask: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True)

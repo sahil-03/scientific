@@ -8,11 +8,8 @@ const chatInput = document.getElementById('chat-input');
 const sendButton = document.getElementById('send-button');
 
 
-pdfUpload.addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    const fileURL = URL.createObjectURL(file);
-    pdfViewer.src = fileURL;
-});
+sendButton.addEventListener('click', sendMessage);
+
 
 function addMessage(message, isUser = true) {
     const messageElement = document.createElement('p');
@@ -21,14 +18,15 @@ function addMessage(message, isUser = true) {
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-function sendMessage() {
+
+async function sendMessage() {
     const message = chatInput.value.trim();
     if (message) {
-        addMessage(message);
+        addMessage(message, true);
         chatInput.value = '';
         
         try {
-            const response = fetch('http://127.0.0.1:5000/ask', {
+            const response = await fetch('http://127.0.0.1:5000/ask', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -37,9 +35,16 @@ function sendMessage() {
                     question: message
                 })
             });
-            const data = response.json();
+            console.log("Received response:", response);
+
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            // console.log(data.answer);
             addMessage(data.answer, false);
-            console.log(data.answer)
         } catch (error) {
             console.error('Error asking question:', error);
             addMessage("Sorry, there was an error processing your question.", false);
@@ -48,12 +53,12 @@ function sendMessage() {
 }
 
 
-sendButton.addEventListener('click', sendMessage);
 
 chatInput.addEventListener('input', function() {
     this.style.height = 'auto';
     this.style.height = (this.scrollHeight) + 'px';
 });
+
 
 chatInput.addEventListener('keydown', function(e) {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -62,7 +67,6 @@ chatInput.addEventListener('keydown', function(e) {
         this.style.height = 'auto';
     }
 });
-
 
 
 pdfUpload.addEventListener('change', function(e) {
@@ -96,6 +100,14 @@ pdfUpload.addEventListener('change', function(e) {
         fileName.textContent = file.name;
     }
 });
+
+
+pdfUpload.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    const fileURL = URL.createObjectURL(file);
+    pdfViewer.src = fileURL;
+});
+
 
 removePdfBtn.addEventListener('click', function() {
     pdfViewer.src = '';
